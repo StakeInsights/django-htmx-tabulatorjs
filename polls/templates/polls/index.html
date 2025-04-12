@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polls Index</title>
+    <!-- Tabulator CSS -->
+    <link href="https://unpkg.com/tabulator-tables@5.4.3/dist/css/tabulator.min.css" rel="stylesheet">
+    <style>
+        #example-table {
+            margin: 20px auto;
+            width: 80%;
+        }
+    </style>
+</head>
+<body>
+
+<!--{% if latest_question_list %}
+    <ul>
+    {% for question in latest_question_list %}
+        <li><a href="/polls/{{ question.id }}/">{{ question.question_text }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No polls are available.</p>
+{% endif %}-->
+
+<div id="example-table"></div>
+
+<h1 style="text-align: center;">Tabulator Table Example</h1>
+    <div>
+        <button id="file-load-trigger">Choose File</button>
+    </div>
+    <!--<div id="example-table"></div> -->
+    <div id="example-table2"></div>
+    <div>
+        <button id="download-csv">Download CSV</button>
+    </div>
+    <!-- Tabulator JS -->
+    <script src="https://unpkg.com/tabulator-tables@5.4.3/dist/js/tabulator.min.js"></script>
+    <script>
+        // Define table data
+        // const tableData = [
+        //     { id: 1, name: "John Doe", age: 29, gender: "Male" },
+        //     { id: 2, name: "Jane Smith", age: 34, gender: "Female" },
+        //     { id: 3, name: "Sam Johnson", age: 23, gender: "Male" },
+        //     { id: 4, name: "Nancy Brown", age: 45, gender: "Female" }
+        // ];
+
+        const tableData = [
+            {% if latest_question_list %}
+                {% for question in latest_question_list %}
+                    { question: "{{ question.question_text }}", pub_date: "{{ question.pub_date }}" },
+                {% endfor %}
+            {% else %}
+                { question: "No polls are available.", pub_date: "" }
+            {% endif %}
+
+        ]
+
+        // Create Tabulator table
+        const table = new Tabulator("#example-table", {
+            data: tableData,
+            layout: "fitData",
+            columns: [
+                { title: "Question", field: "question"},
+                { title: "Date", field: "pub_date" }
+            ]
+        });
+
+        var table2 = new Tabulator("#example-table2", {
+            height:311,
+            layout:"fitData",
+            autoColumns:true,
+            progressiveLoad:true,
+            autoColumns: true,
+            autoColumnsDefinitions: function(definitions) {
+                definitions.forEach(function(column) {
+                    column.editor = "input"; // or your desired editor
+                    column.editable = true;
+                });
+                return definitions;
+            },
+            placeholder:"Awaiting Data, Please Load File",
+        });
+
+        // columns = table2.getColumns();
+        // columns.forEach(function(column){
+        //     column.editable = true;
+        //     column.editor = "input";
+        // });
+
+    //trigger AJAX load on "Load Data via AJAX" button click
+    document.getElementById("file-load-trigger").addEventListener("click", function(){
+        table2.import("csv", [".xlsx", ".csv", ".ods"], "buffer");
+    });
+
+
+    document.getElementById("download-csv").addEventListener("click", function() {
+        table2.download("csv", "edited-data.csv");
+    });
+    </script>
+</body>
+</html>
+
